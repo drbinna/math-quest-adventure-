@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Quest Adventure</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: white;
+        }
+
+        .game-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 600px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .game-stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 30px;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .stat-item {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 10px 20px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .question-area {
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            padding: 30px;
+            border-radius: 15px;
+            margin: 20px 0;
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .question {
+            font-size: 2em;
+            margin-bottom: 20px;
+            font-weight: bold;
+            color: #4a5568;
+        }
+
+        .answers {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .answer-btn {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            font-size: 1.3em;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .answer-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .answer-btn.correct {
+            background: linear-gradient(135deg, #4caf50, #45a049);
+            animation: correctPulse 0.6s ease-in-out;
+        }
+
+        .answer-btn.incorrect {
+            background: linear-gradient(135deg, #f44336, #d32f2f);
+            animation: incorrectShake 0.6s ease-in-out;
+        }
+
+        @keyframes correctPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        @keyframes incorrectShake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .feedback {
+            font-size: 1.4em;
+            font-weight: bold;
+            margin: 15px 0;
+            padding: 15px;
+            border-radius: 10px;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .feedback.correct {
+            background: rgba(76, 175, 80, 0.2);
+            color: #2e7d32;
+            border: 2px solid #4caf50;
+        }
+
+        .feedback.incorrect {
+            background: rgba(244, 67, 54, 0.2);
+            color: #c62828;
+            border: 2px solid #f44336;
+        }
+
+        .next-btn {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            border-radius: 25px;
+            cursor: pointer;
+            margin-top: 20px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            display: none;
+        }
+
+        .next-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 5px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #FFD700, #FFA500);
+            width: 0%;
+            transition: width 0.5s ease;
+            border-radius: 5px;
+        }
+
+        .game-over {
+            display: none;
+            text-align: center;
+        }
+
+        .final-score {
+            font-size: 3em;
+            margin: 20px 0;
+            color: #FFD700;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .restart-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.3em;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .restart-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .start-screen {
+            text-align: center;
+        }
+
+        .difficulty-selector {
+            margin: 20px 0;
+        }
+
+        .difficulty-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            padding: 10px 20px;
+            margin: 0 10px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 1.1em;
+            transition: all 0.3s ease;
+        }
+
+        .difficulty-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.6);
+        }
+
+        .difficulty-btn.selected {
+            background: #FFD700;
+            color: #333;
+            border-color: #FFD700;
+        }
+
+        .start-btn {
+            background: linear-gradient(135deg, #4caf50, #45a049);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.4em;
+            border-radius: 25px;
+            cursor: pointer;
+            margin-top: 20px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .start-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        @media (max-width: 600px) {
+            .answers {
+                grid-template-columns: 1fr;
+            }
+            
+            .game-stats {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <!-- Start Screen -->
+        <div id="startScreen" class="start-screen">
+            <h1>🎮 Math Quest Adventure</h1>
+            <p style="font-size: 1.2em; margin: 20px 0;">Embark on an epic mathematical journey!</p>
+            
+            <div class="difficulty-selector">
+                <p style="font-size: 1.1em; margin-bottom: 15px;">Choose Your Quest Difficulty:</p>
+                <button class="difficulty-btn selected" data-difficulty="easy">Easy (1-10)</button>
+                <button class="difficulty-btn" data-difficulty="medium">Medium (1-50)</button>
+                <button class="difficulty-btn" data-difficulty="hard">Hard (1-100)</button>
+            </div>
+            
+            <button class="start-btn" onclick="startGame()">🚀 Begin Adventure</button>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="gameScreen" style="display: none;">
+            <h1>🎮 Math Quest Adventure</h1>
+            
+            <div class="game-stats">
+                <div class="stat-item">
+                    <div>Level: <span id="level">1</span></div>
+                </div>
+                <div class="stat-item">
+                    <div>Score: <span id="score">0</span></div>
+                </div>
+                <div class="stat-item">
+                    <div>Lives: <span id="lives">❤️❤️❤️</span></div>
+                </div>
+            </div>
+
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+
+            <div class="question-area">
+                <div class="question" id="question">Loading...</div>
+                <div class="answers" id="answersContainer">
+                    <button class="answer-btn" onclick="checkAnswer(this, 0)"></button>
+                    <button class="answer-btn" onclick="checkAnswer(this, 1)"></button>
+                    <button class="answer-btn" onclick="checkAnswer(this, 2)"></button>
+                    <button class="answer-btn" onclick="checkAnswer(this, 3)"></button>
+                </div>
+                <div class="feedback" id="feedback"></div>
+                <button class="next-btn" id="nextBtn" onclick="nextQuestion()">Next Question ➡️</button>
+            </div>
+        </div>
+
+        <!-- Game Over Screen -->
+        <div id="gameOverScreen" class="game-over">
+            <h1>🎊 Quest Complete!</h1>
+            <div class="final-score" id="finalScore">0</div>
+            <p id="gameOverMessage" style="font-size: 1.3em; margin: 20px 0;"></p>
+            <button class="restart-btn" onclick="resetGame()">🔄 New Adventure</button>
+        </div>
+    </div>
+
+    <script>
+        let currentQuestion = {};
+        let score = 0;
+        let level = 1;
+        let lives = 3;
+        let questionsAnswered = 0;
+        let questionsPerLevel = 5;
+        let difficulty = 'easy';
+        let maxNumber = 10;
+        let answered = false;
+
+        const difficultySettings = {
+            easy: { max: 10, operations: ['+', '-'] },
+            medium: { max: 50, operations: ['+', '-', '×'] },
+            hard: { max: 100, operations: ['+', '-', '×', '÷'] }
+        };
+
+        // Difficulty selection
+        document.addEventListener('DOMContentLoaded', function() {
+            const difficultyBtns = document.querySelectorAll('.difficulty-btn');
+            difficultyBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    difficultyBtns.forEach(b => b.classList.remove('selected'));
+                    this.classList.add('selected');
+                    difficulty = this.dataset.difficulty;
+                });
+            });
+        });
+
+        function startGame() {
+            const settings = difficultySettings[difficulty];
+            maxNumber = settings.max;
+            
+            document.getElementById('startScreen').style.display = 'none';
+            document.getElementById('gameScreen').style.display = 'block';
+            
+            score = 0;
+            level = 1;
+            lives = 3;
+            questionsAnswered = 0;
+            
+            updateUI();
+            generateQuestion();
+        }
+
+        function generateQuestion() {
+            answered = false;
+            const settings = difficultySettings[difficulty];
+            const operations = settings.operations;
+            const operation = operations[Math.floor(Math.random() * operations.length)];
+            
+            let num1, num2, correctAnswer;
+            
+            switch(operation) {
+                case '+':
+                    num1 = Math.floor(Math.random() * maxNumber) + 1;
+                    num2 = Math.floor(Math.random() * maxNumber) + 1;
+                    correctAnswer = num1 + num2;
+                    currentQuestion = {
+                        text: `${num1} + ${num2} = ?`,
+                        correct: correctAnswer
+                    };
+                    break;
+                    
+                case '-':
+                    num1 = Math.floor(Math.random() * maxNumber) + 1;
+                    num2 = Math.floor(Math.random() * num1) + 1;
+                    correctAnswer = num1 - num2;
+                    currentQuestion = {
+                        text: `${num1} - ${num2} = ?`,
+                        correct: correctAnswer
+                    };
+                    break;
+                    
+                case '×':
+                    num1 = Math.floor(Math.random() * Math.min(12, maxNumber)) + 1;
+                    num2 = Math.floor(Math.random() * Math.min(12, maxNumber)) + 1;
+                    correctAnswer = num1 * num2;
+                    currentQuestion = {
+                        text: `${num1} × ${num2} = ?`,
+                        correct: correctAnswer
+                    };
+                    break;
+                    
+                case '÷':
+                    num2 = Math.floor(Math.random() * 12) + 1;
+                    correctAnswer = Math.floor(Math.random() * 12) + 1;
+                    num1 = num2 * correctAnswer;
+                    currentQuestion = {
+                        text: `${num1} ÷ ${num2} = ?`,
+                        correct: correctAnswer
+                    };
+                    break;
+            }
+
+            // Generate answer options
+            const answers = [correctAnswer];
+            while(answers.length < 4) {
+                let wrongAnswer;
+                if (operation === '÷') {
+                    wrongAnswer = correctAnswer + Math.floor(Math.random() * 6) - 3;
+                } else {
+                    wrongAnswer = correctAnswer + Math.floor(Math.random() * 20) - 10;
+                }
+                if (wrongAnswer > 0 && !answers.includes(wrongAnswer)) {
+                    answers.push(wrongAnswer);
+                }
+            }
+            
+            // Shuffle answers
+            for (let i = answers.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [answers[i], answers[j]] = [answers[j], answers[i]];
+            }
+            
+            currentQuestion.correctIndex = answers.indexOf(correctAnswer);
+            currentQuestion.answers = answers;
+            
+            displayQuestion();
+        }
+
+        function displayQuestion() {
+            document.getElementById('question').textContent = currentQuestion.text;
+            const buttons = document.querySelectorAll('.answer-btn');
+            const feedback = document.getElementById('feedback');
+            const nextBtn = document.getElementById('nextBtn');
+            
+            buttons.forEach((btn, index) => {
+                btn.textContent = currentQuestion.answers[index];
+                btn.className = 'answer-btn';
+                btn.disabled = false;
+            });
+            
+            feedback.textContent = '';
+            feedback.className = 'feedback';
+            nextBtn.style.display = 'none';
+        }
+
+        function checkAnswer(button, answerIndex) {
+            if (answered) return;
+            
+            answered = true;
+            const buttons = document.querySelectorAll('.answer-btn');
+            const feedback = document.getElementById('feedback');
+            const nextBtn = document.getElementById('nextBtn');
+            
+            buttons.forEach(btn => btn.disabled = true);
+            
+            if (answerIndex === currentQuestion.correctIndex) {
+                button.classList.add('correct');
+                feedback.textContent = `🎉 Excellent! ${currentQuestion.text.replace('?', currentQuestion.correct)}`;
+                feedback.className = 'feedback correct';
+                
+                score += (10 * level);
+                questionsAnswered++;
+                
+                // Bonus points for perfect streaks
+                if (lives === 3) {
+                    score += 5;
+                    feedback.textContent += ' +5 bonus for perfect health!';
+                }
+                
+            } else {
+                button.classList.add('incorrect');
+                buttons[currentQuestion.correctIndex].classList.add('correct');
+                feedback.textContent = `❌ Not quite! The answer is ${currentQuestion.correct}`;
+                feedback.className = 'feedback incorrect';
+                
+                lives--;
+                if (lives <= 0) {
+                    setTimeout(() => endGame(), 2000);
+                    return;
+                }
+            }
+            
+            nextBtn.style.display = 'inline-block';
+            updateUI();
+        }
+
+        function nextQuestion() {
+            if (questionsAnswered >= questionsPerLevel) {
+                levelUp();
+            } else {
+                generateQuestion();
+            }
+        }
+
+        function levelUp() {
+            level++;
+            questionsAnswered = 0;
+            
+            // Increase difficulty slightly each level
+            if (difficulty === 'easy' && level > 3) {
+                maxNumber = Math.min(20, 10 + (level - 3) * 2);
+            } else if (difficulty === 'medium' && level > 3) {
+                maxNumber = Math.min(100, 50 + (level - 3) * 5);
+            }
+            
+            // Restore one life every few levels
+            if (level % 3 === 0 && lives < 3) {
+                lives++;
+            }
+            
+            updateUI();
+            
+            // Show level up message
+            const feedback = document.getElementById('feedback');
+            feedback.textContent = `🎖️ Level ${level} Unlocked! Difficulty increased!`;
+            feedback.className = 'feedback correct';
+            
+            setTimeout(() => {
+                generateQuestion();
+            }, 2000);
+        }
+
+        function updateUI() {
+            document.getElementById('score').textContent = score;
+            document.getElementById('level').textContent = level;
+            
+            // Update lives display
+            const heartsArray = Array(lives).fill('❤️');
+            const greyHearts = Array(3 - lives).fill('🖤');
+            document.getElementById('lives').textContent = heartsArray.concat(greyHearts).join('');
+            
+            // Update progress bar
+            const progress = (questionsAnswered / questionsPerLevel) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+        }
+
+        function endGame() {
+            document.getElementById('gameScreen').style.display = 'none';
+            document.getElementById('gameOverScreen').style.display = 'block';
+            
+            document.getElementById('finalScore').textContent = score;
+            
+            let message = '';
+            if (score >= 500) {
+                message = '🏆 Mathematical Genius! You\'ve mastered the numbers!';
+            } else if (score >= 300) {
+                message = '🥇 Math Champion! Outstanding performance!';
+            } else if (score >= 200) {
+                message = '🥈 Great job! You\'re getting really good at this!';
+            } else if (score >= 100) {
+                message = '🥉 Nice work! Keep practicing to improve!';
+            } else {
+                message = '💪 Good effort! Every mathematician starts somewhere!';
+            }
+            
+            message += `\n\nYou reached Level ${level} and answered ${questionsAnswered + (level - 1) * questionsPerLevel} questions correctly!`;
+            document.getElementById('gameOverMessage').textContent = message;
+        }
+
+        function resetGame() {
+            document.getElementById('gameOverScreen').style.display = 'none';
+            document.getElementById('startScreen').style.display = 'block';
+        }
+
+        // Keyboard support for accessibility
+        document.addEventListener('keydown', function(e) {
+            if (document.getElementById('gameScreen').style.display !== 'none' && !answered) {
+                const key = parseInt(e.key);
+                if (key >= 1 && key <= 4) {
+                    const buttons = document.querySelectorAll('.answer-btn');
+                    buttons[key - 1].click();
+                }
+            }
+        });
+    </script>
+</body>
+</html>
